@@ -60,14 +60,16 @@ interface TaskResult {
 
 interface TaskCardProps {
   id: string;
-  type: 'url' | 'file';
+  type: 'url' | 'file' | 'multi-url' | 'pdf-tools';
   source: string;
   status: 'processing' | 'completed' | 'failed';
   progress: number;
+  properties_count?: number;
+  source_urls?: string[];
   results?: TaskResult;
 }
 
-export function TaskCard({ id, type, source, status, progress, results }: TaskCardProps) {
+export function TaskCard({ id, type, source, status, progress, properties_count, source_urls, results }: TaskCardProps) {
   const getStatusColor = () => {
     switch (status) {
       case 'processing': return 'bg-blue-100 text-blue-800';
@@ -105,7 +107,9 @@ export function TaskCard({ id, type, source, status, progress, results }: TaskCa
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">
-            {type === 'url' ? 'URL Processing' : 'File Processing'}
+            {type === 'url' ? 'URL Processing' : 
+             type === 'multi-url' ? `Multi-Property Report (${properties_count} properties)` :
+             type === 'pdf-tools' ? 'PDF Operations' : 'File Processing'}
           </CardTitle>
           <Badge className={getStatusColor()}>
             {status.charAt(0).toUpperCase() + status.slice(1)}

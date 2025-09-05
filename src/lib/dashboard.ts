@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 // Comprehensive task data interface
 export interface TaskData {
   id: string;
-  type: 'url' | 'file';
+  type: 'url' | 'file' | 'multi-url' | 'pdf-tools';
   source: string;
   status: 'processing' | 'completed' | 'failed';
   progress: number;
+  properties_count?: number;
+  source_urls?: string[];
   results?: {
     price?: string;
     address?: string;
@@ -95,39 +97,86 @@ const notifyListeners = () => {
 // Main function to start processing
 export const startProcessing = async (): Promise<void> => {
   try {
-    // Get input values from the DOM (in a real app, this would be passed as parameters)
-    const urlInput = document.querySelector('#urlInput') as HTMLInputElement;
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    const compressionSelect = document.querySelector('[data-testid="compression-select"]') as HTMLSelectElement;
-    const formatSelect = document.querySelector('[data-testid="format-select"]') as HTMLSelectElement;
-
+    // Detect which tab is active
+    const activeTab = document.querySelector('[data-state="active"]')?.getAttribute('data-value') || 'url';
+    
     let source: string;
-    let type: 'url' | 'file';
+    let type: 'url' | 'file' | 'multi-url' | 'pdf-tools';
+    let additionalData: any = {};
 
-    if (urlInput?.value) {
-      source = urlInput.value;
-      type = 'url';
-    } else if (fileInput?.files?.[0]) {
-      source = fileInput.files[0].name;
-      type = 'file';
+    if (activeTab === 'url') {
+      const urlInput = document.querySelector('#urlInput') as HTMLInputElement;
+      if (urlInput?.value) {
+        source = urlInput.value;
+        type = 'url';
+      } else {
+        toast({
+          title: "Error",
+          description: "Please provide a URL",
+          variant: "destructive"
+        });
+        return;
+      }
+    } else if (activeTab === 'file') {
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      if (fileInput?.files?.[0]) {
+        source = fileInput.files[0].name;
+        type = 'file';
+      } else {
+        toast({
+          title: "Error",
+          description: "Please select a file",
+          variant: "destructive"
+        });
+        return;
+      }
+    } else if (activeTab === 'multi-url') {
+      const urlInputs = document.querySelectorAll('[placeholder*="Property URL"]') as NodeListOf<HTMLInputElement>;
+      const urls = Array.from(urlInputs)
+        .map(input => input.value.trim())
+        .filter(url => url.length > 0);
+      
+      if (urls.length === 0) {
+        toast({
+          title: "Error",
+          description: "Please provide at least one property URL",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      source = `${urls.length} properties`;
+      type = 'multi-url';
+      additionalData.urls = urls;
+    } else if (activeTab === 'pdf-tools') {
+      source = 'PDF operation';
+      type = 'pdf-tools';
     } else {
       toast({
         title: "Error",
-        description: "Please provide a URL or select a file to process.",
+        description: "Please select a valid input method",
         variant: "destructive"
       });
       return;
     }
 
     // Insert task into database
+    const taskInsert: any = {
+      type,
+      source,
+      status: 'processing',
+      progress: 0
+    };
+
+    // Add additional fields for multi-url tasks
+    if (type === 'multi-url' && additionalData.urls) {
+      taskInsert.properties_count = additionalData.urls.length;
+      taskInsert.source_urls = additionalData.urls;
+    }
+
     const { data: taskData, error } = await supabase
       .from('tasks')
-      .insert({
-        type,
-        source,
-        status: 'processing',
-        progress: 0
-      })
+      .insert(taskInsert)
       .select()
       .single();
 
@@ -140,20 +189,37 @@ export const startProcessing = async (): Promise<void> => {
       await supabase.functions.invoke('process-url', {
         body: { taskId: taskData.id, url: source }
       });
-    } else {
+    } else if (type === 'multi-url') {
+      await supabase.functions.invoke('process-multiple-urls', {
+        body: { 
+          taskId: taskData.id, 
+          urls: additionalData.urls 
+        }
+      });
+    } else if (type === 'file') {
       await supabase.functions.invoke('process-file', {
         body: { 
           taskId: taskData.id, 
-          fileName: source,
-          compressionLevel: compressionSelect?.value || 'medium',
-          outputFormat: formatSelect?.value || 'pdf'
+          fileName: source
         }
       });
+    } else if (type === 'pdf-tools') {
+      toast({
+        title: "Coming Soon",
+        description: "PDF tools functionality will be available soon",
+        variant: "default"
+      });
+      return;
     }
 
-    // Clear inputs
-    if (urlInput) urlInput.value = '';
-    if (fileInput) fileInput.value = '';
+    // Clear inputs based on type
+    if (type === 'url') {
+      const urlInput = document.querySelector('#urlInput') as HTMLInputElement;
+      if (urlInput) urlInput.value = '';
+    } else if (type === 'file') {
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+    }
 
     toast({
       title: "Processing Started",
@@ -191,10 +257,12 @@ export const fetchTasks = async () => {
       const results = extractedData.find(data => data.task_id === task.id);
       return {
         id: task.id,
-        type: task.type as 'url' | 'file',
+        type: task.type as 'url' | 'file' | 'multi-url' | 'pdf-tools',
         source: task.source,
         status: task.status as 'processing' | 'completed' | 'failed',
         progress: task.progress,
+        properties_count: task.properties_count,
+        source_urls: task.source_urls,
         results: results ? {
           price: results.price,
           address: results.address,

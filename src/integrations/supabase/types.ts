@@ -157,12 +157,52 @@ export type Database = {
           },
         ]
       }
+      pdf_operations: {
+        Row: {
+          created_at: string
+          id: string
+          input_files: string[]
+          operation_type: string
+          output_files: string[]
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_files: string[]
+          operation_type: string
+          output_files: string[]
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_files?: string[]
+          operation_type?: string
+          output_files?: string[]
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdf_operations_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           created_at: string
           id: string
           progress: number
+          properties_count: number | null
           source: string
+          source_urls: string[] | null
           status: string
           type: string
           updated_at: string
@@ -171,7 +211,9 @@ export type Database = {
           created_at?: string
           id?: string
           progress?: number
+          properties_count?: number | null
           source: string
+          source_urls?: string[] | null
           status?: string
           type: string
           updated_at?: string
@@ -180,7 +222,9 @@ export type Database = {
           created_at?: string
           id?: string
           progress?: number
+          properties_count?: number | null
           source?: string
+          source_urls?: string[] | null
           status?: string
           type?: string
           updated_at?: string
