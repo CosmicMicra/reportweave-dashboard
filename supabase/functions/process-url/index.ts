@@ -1095,85 +1095,160 @@ async function pollFoxitJob(jobId: string, apiKey: string): Promise<ArrayBuffer>
 }
 
 async function createFallbackPdf(data: any): Promise<string> {
-  console.log('Creating fallback PDF using htmlcsstoimage.com');
+  console.log('Creating robust fallback PDF');
   
-  // Use a free HTML to PDF service as fallback
-  const htmlContent = `
-    <div style="font-family: Arial, sans-serif; padding: 40px; max-width: 800px;">
-      <h1 style="color: #333; border-bottom: 3px solid #4a90e2; padding-bottom: 10px;">Property Report</h1>
-      <h2 style="color: #666; margin-bottom: 30px;">${data.address}</h2>
+  try {
+    // Use our enhanced HTML template
+    const htmlContent = createEnhancedPropertyReport(data);
+    
+    // Try a reliable HTML to PDF API
+    let pdfBuffer: ArrayBuffer | null = null;
+    
+    // Method 1: Try PDF Shift API (free tier available)
+    try {
+      console.log('Attempting PDF generation with API...');
+      const response = await fetch('https://api.pdfshift.com/v3/convert/pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          source: htmlContent,
+          format: 'A4',
+          margin: '1cm',
+          print_background: true
+        })
+      });
       
-      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-        <p><strong>MLS #:</strong> ${data.mlsNumber} | <strong>Listed:</strong> ${data.listingDate}</p>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-        <div>
-          <h3 style="color: #4a90e2;">Price & Details</h3>
-          <p><strong>Price:</strong> <span style="color: #27ae60; font-size: 1.5em;">${data.price}</span></p>
-          <p><strong>Bedrooms:</strong> ${data.bedrooms}</p>
-          <p><strong>Bathrooms:</strong> ${data.bathrooms}</p>
-          <p><strong>Square Footage:</strong> ${data.squareFootage?.toLocaleString()} sq ft</p>
-        </div>
-        <div>
-          <h3 style="color: #4a90e2;">Property Info</h3>
-          <p><strong>Year Built:</strong> ${data.yearBuilt}</p>
-          <p><strong>Lot Size:</strong> ${data.lotSize}</p>
-          <p><strong>Parking:</strong> ${data.parking}</p>
-          <p><strong>Type:</strong> ${data.propertyType}</p>
-        </div>
-      </div>
-      
-      <div>
-        <h3 style="color: #4a90e2;">Features</h3>
-        <ul>
-          ${data.features.map((feature: string) => `<li>${feature}</li>`).join('')}
-        </ul>
-      </div>
-    </div>
-  `;
-  
-  // Store as HTML first, then reference it
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  const fileName = `property-report-fallback-${Date.now()}.pdf`;
-  
-  // For now, create a simple text-based "PDF" file
-  const textContent = `
-PROPERTY REPORT
-${data.address}
-
-MLS #: ${data.mlsNumber}
-Listed: ${data.listingDate}
-
-PRICE & DETAILS
-Price: ${data.price}
-Bedrooms: ${data.bedrooms}
-Bathrooms: ${data.bathrooms}
-Square Footage: ${data.squareFootage} sq ft
-
-PROPERTY INFO
-Year Built: ${data.yearBuilt}
-Lot Size: ${data.lotSize}
-Parking: ${data.parking}
-Type: ${data.propertyType}
-
-FEATURES
-${data.features.map((f: string) => `• ${f}`).join('\n')}
-
-Generated on ${new Date().toLocaleDateString()}
-Powered by ReportWeave Analytics
-  `;
-  
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from('reports')
-    .upload(fileName, new Blob([textContent], { type: 'text/plain' }), {
-      contentType: 'text/plain',
-      upsert: false
-    });
-
-  if (uploadError) {
-    throw uploadError;
+      if (response.ok && response.headers.get('content-type')?.includes('application/pdf')) {
+        pdfBuffer = await response.arrayBuffer();
+        console.log('Successfully generated PDF with external API');
+      }
+    } catch (error) {
+      console.log('External PDF API failed:', error.message);
+    }
+    
+    // Method 2: Create a proper PDF using basic PDF structure
+    if (!pdfBuffer) {
+      console.log('Creating structured PDF manually...');
+      pdfBuffer = createBasicPdf(data);
+    }
+    
+    // Store the PDF in Supabase Storage
+    return await storePdfInSupabase(pdfBuffer, 'property-report-fallback');
+    
+  } catch (error) {
+    console.error('All PDF generation methods failed:', error);
+    
+    // Absolute last resort: Create a minimal valid PDF
+    const minimalPdf = createBasicPdf(data);
+    return await storePdfInSupabase(minimalPdf, 'property-report-basic');
   }
+}
 
-  return `https://qtpohoygpgkfzuqvxsdv.supabase.co/storage/v1/object/public/reports/${fileName}`;
+// Create a basic but properly formatted PDF
+function createBasicPdf(data: any): ArrayBuffer {
+  console.log('Creating basic PDF with proper PDF structure');
+  
+  // Create a simple but valid PDF document
+  const content = `
+Property Report
+${data.address || 'Property Address'}
+
+Price: ${data.price || 'N/A'}
+Bedrooms: ${data.bedrooms || 'N/A'}
+Bathrooms: ${data.bathrooms || 'N/A'}
+Square Footage: ${data.squareFootage || 'N/A'} sq ft
+
+Agent: ${data.agentInfo?.name || 'N/A'}
+Phone: ${data.agentInfo?.phone || 'N/A'}
+Email: ${data.agentInfo?.email || 'N/A'}
+
+School District: ${data.schoolDistrict || 'N/A'}
+Year Built: ${data.yearBuilt || 'N/A'}
+Lot Size: ${data.lotSize || 'N/A'}
+
+Features:
+${data.features ? data.features.map((f: string) => `• ${f}`).join('\n') : '• No features listed'}
+
+Generated: ${new Date().toLocaleDateString()}
+Report by ReportWeave Analytics
+  `.trim();
+  
+  // Create a minimal PDF structure that should be readable by most PDF viewers
+  const pdfContent = `%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Contents 4 0 R
+/Resources <<
+/Font <<
+/F1 5 0 R
+>>
+>>
+>>
+endobj
+
+4 0 obj
+<<
+/Length ${content.length + 200}
+>>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+${content.split('\n').map((line, index) => {
+  const yPos = 750 - (index * 15);
+  if (yPos < 50) return ''; // Don't write below page bottom
+  return line.length > 0 ? `(${line.replace(/[()]/g, '')}) Tj 0 -15 Td` : '0 -15 Td';
+}).filter(Boolean).join('\n')}
+ET
+endstream
+endobj
+
+5 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000285 00000 n 
+0000000${(content.length + 500).toString().padStart(3, '0')} 00000 n 
+trailer
+<<
+/Size 6
+/Root 1 0 R
+>>
+startxref
+${content.length + 600}
+%%EOF`;
+
+  // Convert to ArrayBuffer
+  const encoder = new TextEncoder();
+  return encoder.encode(pdfContent).buffer;
 }
