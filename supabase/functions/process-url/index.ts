@@ -271,546 +271,32 @@ async function scrapeRealEstateData(url: string) {
 
 async function generatePdfWithFoxit(data: any, apiKey: string): Promise<string> {
   try {
-    console.log('Generating professional PDF with Foxit API');
+    console.log('Starting chained Foxit document automation workflow');
     
-    // Create comprehensive HTML content with all property details and professional styling
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Property Report - ${data.address}</title>
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-          
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          
-          body { 
-            font-family: 'Inter', sans-serif; 
-            line-height: 1.6; 
-            color: #1a1a1a;
-            background: #ffffff;
-            padding: 20px;
-          }
-          
-          .cover-page {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 60px 40px;
-            text-align: center;
-            border-radius: 16px;
-            margin-bottom: 40px;
-            page-break-after: always;
-          }
-          
-          .cover-page h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-          }
-          
-          .cover-page h2 {
-            font-size: 1.8rem;
-            font-weight: 400;
-            opacity: 0.9;
-            margin-bottom: 30px;
-          }
-          
-          .cover-page .price {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: rgba(255,255,255,0.2);
-            padding: 20px;
-            border-radius: 12px;
-            display: inline-block;
-          }
-          
-          .agent-banner {
-            background: #f8fafc;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            border-left: 6px solid #667eea;
-          }
-          
-          .agent-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
-          
-          .property-hero {
-            position: relative;
-            margin-bottom: 30px;
-          }
-          
-          .hero-image {
-            width: 100%;
-            height: 400px;
-            object-fit: cover;
-            border-radius: 16px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-          }
-          
-          .property-images {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 40px;
-          }
-          
-          .property-images img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-          }
-          
-          .quick-facts {
-            background: #f8fafc;
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            border: 2px solid #e2e8f0;
-          }
-          
-          .quick-facts-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            text-align: center;
-          }
-          
-          .quick-fact {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-          }
-          
-          .quick-fact-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 5px;
-          }
-          
-          .quick-fact-label {
-            font-size: 0.875rem;
-            color: #64748b;
-            font-weight: 500;
-          }
-          
-          .details-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
-            margin-bottom: 40px;
-          }
-          
-          .detail-section {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-          }
-          
-          .detail-section.full-width {
-            grid-column: 1 / -1;
-          }
-          
-          .detail-section h3 {
-            color: #667eea;
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-          }
-          
-          .detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f1f5f9;
-          }
-          
-          .detail-row:last-child {
-            border-bottom: none;
-          }
-          
-          .detail-label {
-            font-weight: 500;
-            color: #64748b;
-            flex: 1;
-          }
-          
-          .detail-value {
-            font-weight: 600;
-            color: #1e293b;
-            text-align: right;
-            flex: 1;
-          }
-          
-          .features-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-          }
-          
-          .feature-item {
-            padding: 12px;
-            background: #f8fafc;
-            border-radius: 8px;
-            border-left: 4px solid #059669;
-            font-weight: 500;
-          }
-          
-          .amenities-list {
-            list-style: none;
-            padding: 0;
-          }
-          
-          .amenities-list li {
-            padding: 8px 0;
-            padding-left: 25px;
-            position: relative;
-            border-bottom: 1px solid #f1f5f9;
-          }
-          
-          .amenities-list li:before {
-            content: "📍";
-            position: absolute;
-            left: 0;
-          }
-          
-          .description {
-            line-height: 1.8;
-            color: #374151;
-            font-size: 1rem;
-          }
-          
-          .school-item {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 4px solid #667eea;
-          }
-          
-          .price-history {
-            margin-top: 15px;
-          }
-          
-          .price-history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: #f8fafc;
-            border-radius: 8px;
-            margin-bottom: 8px;
-          }
-          
-          .virtual-tour-banner {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 16px;
-            text-align: center;
-            margin: 30px 0;
-          }
-          
-          .footer {
-            margin-top: 50px;
-            text-align: center;
-            padding: 30px;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border-radius: 16px;
-            color: #64748b;
-          }
-          
-          .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 10px;
-          }
-        </style>
-      </head>
-      <body>
-        <!-- Cover Page -->
-        <div class="cover-page">
-          <h1>Premium Property Report</h1>
-          <h2>${data.address}</h2>
-          <div class="price">${data.price}</div>
-          <p style="margin-top: 20px; font-size: 1.1rem;">MLS #${data.mlsNumber} • ${data.listingDate}</p>
-        </div>
-        
-        <!-- Agent Information -->
-        <div class="agent-banner">
-          <div class="agent-info">
-            <div>
-              <h3 style="color: #667eea; margin-bottom: 5px;">${data.agentInfo?.name || 'Professional Agent'}</h3>
-              <p><strong>License:</strong> ${data.agentInfo?.license || 'CA DRE #01234567'}</p>
-              <p><strong>Brokerage:</strong> ${data.agentInfo?.brokerage || 'Premium Real Estate Group'}</p>
-            </div>
-            <div style="text-align: right;">
-              <p><strong>Phone:</strong> ${data.agentInfo?.phone || '(555) 123-4567'}</p>
-              <p><strong>Email:</strong> ${data.agentInfo?.email || 'agent@realty.com'}</p>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Hero Image -->
-        <div class="property-hero">
-          <img src="${data.images[0]}" alt="Property Hero Image" class="hero-image" />
-        </div>
-        
-        <!-- Quick Facts -->
-        <div class="quick-facts">
-          <h3 style="text-align: center; margin-bottom: 20px; color: #667eea;">Property Overview</h3>
-          <div class="quick-facts-grid">
-            <div class="quick-fact">
-              <div class="quick-fact-value">${data.bedrooms}</div>
-              <div class="quick-fact-label">Bedrooms</div>
-            </div>
-            <div class="quick-fact">
-              <div class="quick-fact-value">${data.bathrooms}</div>
-              <div class="quick-fact-label">Bathrooms</div>
-            </div>
-            <div class="quick-fact">
-              <div class="quick-fact-value">${data.squareFootage?.toLocaleString()}</div>
-              <div class="quick-fact-label">Sq Ft</div>
-            </div>
-            <div class="quick-fact">
-              <div class="quick-fact-value">${data.marketStats?.daysOnMarket || 'N/A'}</div>
-              <div class="quick-fact-label">Days on Market</div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Property Images Grid -->
-        <div class="property-images">
-          ${data.images.slice(1).map((img: string) => `<img src="${img}" alt="Property Image" />`).join('')}
-        </div>
-        
-        <!-- Property Description -->
-        <div class="detail-section full-width">
-          <h3>📋 Property Description</h3>
-          <div class="description">
-            ${data.propertyDescription || 'Beautiful property with exceptional features and prime location. Perfect for families seeking comfort and convenience in a desirable neighborhood.'}
-          </div>
-        </div>
-        
-        <!-- Details Grid -->
-        <div class="details-grid">
-          <div class="detail-section">
-            <h3>💰 Financial Details</h3>
-            <div class="detail-row">
-              <span class="detail-label">Listing Price:</span>
-              <span class="detail-value" style="color: #059669; font-weight: 700;">${data.price}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Price per Sq Ft:</span>
-              <span class="detail-value">${data.marketStats?.pricePerSqFt || '$850'}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Property Tax:</span>
-              <span class="detail-value">${data.financials?.propertyTax || '$18,500/year'}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">HOA Fees:</span>
-              <span class="detail-value">${data.financials?.hoaFees || 'None'}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Insurance (Est.):</span>
-              <span class="detail-value">${data.financials?.insurance || '$2,400/year'}</span>
-            </div>
-          </div>
-          
-          <div class="detail-section">
-            <h3>🏠 Property Specifications</h3>
-            <div class="detail-row">
-              <span class="detail-label">Year Built:</span>
-              <span class="detail-value">${data.yearBuilt}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Lot Size:</span>
-              <span class="detail-value">${data.lotSize}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Parking:</span>
-              <span class="detail-value">${data.parking}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Property Type:</span>
-              <span class="detail-value">${data.propertyType}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Square Footage:</span>
-              <span class="detail-value">${data.squareFootage?.toLocaleString()} sq ft</span>
-            </div>
-          </div>
-          
-          <div class="detail-section">
-            <h3>🎯 Market Analysis</h3>
-            <div class="detail-row">
-              <span class="detail-label">Days on Market:</span>
-              <span class="detail-value">${data.marketStats?.daysOnMarket || 15} days</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Last Sold:</span>
-              <span class="detail-value">${data.marketStats?.lastSoldDate || '2018-03-15'}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Last Sold Price:</span>
-              <span class="detail-value">${data.marketStats?.lastSoldPrice || '$2,850,000'}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">School District:</span>
-              <span class="detail-value">${data.schoolDistrict || 'Excellent School District'}</span>
-            </div>
-          </div>
-          
-          <div class="detail-section">
-            <h3>🚶 Walkability & Transit</h3>
-            <div class="detail-row">
-              <span class="detail-label">Walk Score:</span>
-              <span class="detail-value">${data.neighborhood?.walkScore || 85}/100</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Transit Score:</span>
-              <span class="detail-value">${data.neighborhood?.transitScore || 72}/100</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Bike Score:</span>
-              <span class="detail-value">${data.neighborhood?.bikeScore || 78}/100</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Key Features -->
-        <div class="detail-section full-width">
-          <h3>⭐ Key Features & Amenities</h3>
-          <div class="features-grid">
-            ${data.features.map((feature: string) => `<div class="feature-item">${feature}</div>`).join('')}
-          </div>
-        </div>
-        
-        <!-- Schools Information -->
-        ${data.schools ? `
-        <div class="detail-section full-width">
-          <h3>🎓 School Information</h3>
-          <div class="school-item">
-            <strong>Elementary:</strong> ${data.schools.elementary}
-          </div>
-          <div class="school-item">
-            <strong>Middle School:</strong> ${data.schools.middle}
-          </div>
-          <div class="school-item">
-            <strong>High School:</strong> ${data.schools.high}
-          </div>
-        </div>
-        ` : ''}
-        
-        <!-- Nearby Amenities -->
-        ${data.neighborhood?.nearbyAmenities ? `
-        <div class="detail-section full-width">
-          <h3>📍 Nearby Amenities</h3>
-          <ul class="amenities-list">
-            ${data.neighborhood.nearbyAmenities.map((amenity: string) => `<li>${amenity}</li>`).join('')}
-          </ul>
-        </div>
-        ` : ''}
-        
-        <!-- Virtual Tour Call-to-Action -->
-        ${data.virtualTour ? `
-        <div class="virtual-tour-banner">
-          <h3>🏠 Virtual Tour Available</h3>
-          <p>Experience this property from the comfort of your home</p>
-          <p style="margin-top: 10px; font-size: 0.9rem;">Visit: ${data.virtualTour}</p>
-        </div>
-        ` : ''}
-        
-        <!-- Footer -->
-        <div class="footer">
-          <div class="logo">ReportWeave Analytics</div>
-          <p>Professional Real Estate Reports • Generated on ${new Date().toLocaleDateString()}</p>
-          <p style="margin-top: 10px; font-size: 0.875rem;">
-            This report is generated for informational purposes. All data should be independently verified.
-          </p>
-        </div>
-      </body>
-      </html>
-    `;
-
-    // Enhanced Foxit API call with proper error handling
-    console.log('Calling Foxit API for HTML to PDF conversion...');
+    // Step 1: Generate base document using Document Generation API
+    const baseDocument = await generateDocumentWithFoxit(data, apiKey);
+    console.log('Base document generated successfully');
     
-    const foxitResponse = await fetch('https://api.foxit.com/v1/conversion/html-to-pdf', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        html_content: htmlContent,
-        options: {
-          page_format: 'A4',
-          page_orientation: 'portrait',
-          margin_top: '15mm',
-          margin_bottom: '15mm',
-          margin_left: '15mm',
-          margin_right: '15mm',
-          print_background: true,
-          scale: 1.0,
-          wait_for_selector: 'body',
-          wait_time: 2000
-        }
-      }),
-    });
-
-    if (!foxitResponse.ok) {
-      const errorText = await foxitResponse.text();
-      console.error('Foxit API Error:', foxitResponse.status, errorText);
-      throw new Error(`Foxit API error: ${foxitResponse.status} - ${errorText}`);
-    }
-
-    const contentType = foxitResponse.headers.get('content-type');
-    console.log('Foxit Response Content-Type:', contentType);
-
-    let pdfBuffer;
-    if (contentType?.includes('application/json')) {
-      // Handle async response with job ID
-      const jobResponse = await foxitResponse.json();
-      console.log('Foxit job response:', jobResponse);
-      
-      if (jobResponse.job_id) {
-        // Poll for completion
-        pdfBuffer = await pollFoxitJob(jobResponse.job_id, apiKey);
-      } else {
-        throw new Error('No job ID received from Foxit API');
-      }
-    } else {
-      // Direct PDF response
-      pdfBuffer = await foxitResponse.arrayBuffer();
-    }
+    // Step 2: Create cover page separately
+    const coverPage = await generateCoverPageWithFoxit(data, apiKey);
+    console.log('Cover page generated successfully');
     
-    // Store PDF in Supabase Storage
+    // Step 3: Generate floor plan/property layout document
+    const floorPlanDoc = await generateFloorPlanDocument(data, apiKey);
+    console.log('Floor plan document generated successfully');
+    
+    // Step 4: Chain PDF Services API for enhancements
+    const enhancedPdf = await chainPdfServicesWorkflow([coverPage, baseDocument, floorPlanDoc], apiKey);
+    console.log('PDF services workflow completed successfully');
+    
+    // Step 5: Store final PDF in Supabase Storage
     const supabase = createClient(supabaseUrl, supabaseKey);
-    const fileName = `property-report-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.pdf`;
+    const fileName = `enhanced-property-report-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.pdf`;
     
-    console.log('Uploading PDF to Supabase Storage...');
+    console.log('Uploading enhanced PDF to Supabase Storage...');
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('reports')
-      .upload(fileName, pdfBuffer, {
+      .upload(fileName, enhancedPdf, {
         contentType: 'application/pdf',
         upsert: false
       });
@@ -821,21 +307,512 @@ async function generatePdfWithFoxit(data: any, apiKey: string): Promise<string> 
     }
 
     const publicUrl = `https://qtpohoygpgkfzuqvxsdv.supabase.co/storage/v1/object/public/reports/${fileName}`;
-    console.log('PDF successfully generated and stored:', publicUrl);
+    console.log('Enhanced PDF successfully generated and stored:', publicUrl);
     return publicUrl;
 
   } catch (error) {
-    console.error('Foxit PDF generation failed:', error);
+    console.error('Foxit chained workflow failed:', error);
     
-    // Create a fallback PDF with basic content using a simple HTML to PDF service
+    // Fallback to simple PDF generation
     try {
       return await createFallbackPdf(data);
     } catch (fallbackError) {
       console.error('Fallback PDF creation also failed:', fallbackError);
-      // Return a sample PDF URL as last resort
       return `https://qtpohoygpgkfzuqvxsdv.supabase.co/storage/v1/object/public/reports/sample-report-${Date.now()}.pdf`;
     }
   }
+}
+
+// Step 1: Document Generation API - Create structured property report
+async function generateDocumentWithFoxit(data: any, apiKey: string): Promise<ArrayBuffer> {
+  console.log('Generating main document with Foxit Document Generation API');
+  
+  const documentTemplate = {
+    template: createPropertyReportTemplate(),
+    data: mapDataForTemplate(data),
+    options: {
+      output_format: 'pdf',
+      page_format: 'A4',
+      page_orientation: 'portrait',
+      margins: {
+        top: '20mm',
+        bottom: '20mm',
+        left: '20mm',
+        right: '20mm'
+      }
+    }
+  };
+
+  const response = await fetch('https://api.foxit.com/v1/document-generation/generate', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/pdf'
+    },
+    body: JSON.stringify(documentTemplate)
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Document Generation API Error:', response.status, errorText);
+    throw new Error(`Document Generation failed: ${response.status} - ${errorText}`);
+  }
+
+  return await response.arrayBuffer();
+}
+
+// Step 2: Generate cover page with hero image
+async function generateCoverPageWithFoxit(data: any, apiKey: string): Promise<ArrayBuffer> {
+  console.log('Generating cover page with Foxit Document Generation API');
+  
+  const coverTemplate = {
+    template: createCoverPageTemplate(),
+    data: {
+      property_address: data.address,
+      property_price: data.price,
+      mls_number: data.mlsNumber,
+      listing_date: data.listingDate,
+      hero_image: data.images[0],
+      agent_name: data.agentInfo?.name || 'Professional Agent',
+      agent_brokerage: data.agentInfo?.brokerage || 'Premium Real Estate'
+    },
+    options: {
+      output_format: 'pdf',
+      page_format: 'A4',
+      page_orientation: 'portrait',
+      background_graphics: true
+    }
+  };
+
+  const response = await fetch('https://api.foxit.com/v1/document-generation/generate', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/pdf'
+    },
+    body: JSON.stringify(coverTemplate)
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Cover Page Generation Error:', response.status, errorText);
+    throw new Error(`Cover page generation failed: ${response.status}`);
+  }
+
+  return await response.arrayBuffer();
+}
+
+// Step 3: Generate floor plan/layout document
+async function generateFloorPlanDocument(data: any, apiKey: string): Promise<ArrayBuffer> {
+  console.log('Generating floor plan document');
+  
+  const floorPlanTemplate = {
+    template: createFloorPlanTemplate(),
+    data: {
+      property_layout: {
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        square_footage: data.squareFootage,
+        lot_size: data.lotSize,
+        year_built: data.yearBuilt
+      },
+      property_images: data.images.slice(1), // Additional property images
+      features: data.features
+    },
+    options: {
+      output_format: 'pdf',
+      page_format: 'A4',
+      page_orientation: 'landscape' // Better for floor plans
+    }
+  };
+
+  const response = await fetch('https://api.foxit.com/v1/document-generation/generate', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/pdf'
+    },
+    body: JSON.stringify(floorPlanTemplate)
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Floor Plan Generation Error:', response.status, errorText);
+    throw new Error(`Floor plan generation failed: ${response.status}`);
+  }
+
+  return await response.arrayBuffer();
+}
+
+// Step 4: Chain PDF Services API workflow
+async function chainPdfServicesWorkflow(documents: ArrayBuffer[], apiKey: string): Promise<ArrayBuffer> {
+  console.log('Starting PDF Services API chained workflow');
+  
+  try {
+    // Step 4.1: Merge all documents
+    console.log('Merging documents...');
+    const mergedPdf = await mergePdfsWithFoxit(documents, apiKey);
+    
+    // Step 4.2: Add watermark and branding
+    console.log('Adding watermark...');
+    const watermarkedPdf = await addWatermarkWithFoxit(mergedPdf, apiKey);
+    
+    // Step 4.3: Compress for optimal file size
+    console.log('Compressing PDF...');
+    const compressedPdf = await compressPdfWithFoxit(watermarkedPdf, apiKey);
+    
+    // Step 4.4: Add password protection
+    console.log('Adding security...');
+    const securedPdf = await addSecurityWithFoxit(compressedPdf, apiKey);
+    
+    return securedPdf;
+    
+  } catch (error) {
+    console.error('PDF Services workflow error:', error);
+    // Return merged document as fallback
+    return await mergePdfsWithFoxit(documents, apiKey);
+  }
+}
+
+// PDF Services API: Merge multiple PDFs
+async function mergePdfsWithFoxit(documents: ArrayBuffer[], apiKey: string): Promise<ArrayBuffer> {
+  const formData = new FormData();
+  
+  documents.forEach((doc, index) => {
+    const blob = new Blob([doc], { type: 'application/pdf' });
+    formData.append(`file_${index}`, blob, `document_${index}.pdf`);
+  });
+  
+  formData.append('merge_options', JSON.stringify({
+    output_filename: 'merged_property_report.pdf',
+    preserve_bookmarks: true,
+    preserve_form_fields: true
+  }));
+
+  const response = await fetch('https://api.foxit.com/v1/pdf-services/merge', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Accept': 'application/pdf'
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('PDF Merge Error:', response.status, errorText);
+    throw new Error(`PDF merge failed: ${response.status}`);
+  }
+
+  return await response.arrayBuffer();
+}
+
+// PDF Services API: Add watermark
+async function addWatermarkWithFoxit(pdfBuffer: ArrayBuffer, apiKey: string): Promise<ArrayBuffer> {
+  const formData = new FormData();
+  const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+  formData.append('file', blob, 'document.pdf');
+  
+  formData.append('watermark_options', JSON.stringify({
+    text: 'ReportWeave Premium',
+    position: 'bottom_right',
+    opacity: 0.3,
+    font_size: 12,
+    color: '#667eea'
+  }));
+
+  const response = await fetch('https://api.foxit.com/v1/pdf-services/watermark', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Accept': 'application/pdf'
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    console.log('Watermark failed, continuing without watermark');
+    return pdfBuffer; // Return original if watermark fails
+  }
+
+  return await response.arrayBuffer();
+}
+
+// PDF Services API: Compress PDF
+async function compressPdfWithFoxit(pdfBuffer: ArrayBuffer, apiKey: string): Promise<ArrayBuffer> {
+  const formData = new FormData();
+  const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+  formData.append('file', blob, 'document.pdf');
+  
+  formData.append('compression_options', JSON.stringify({
+    quality: 'high', // high, medium, low
+    image_quality: 85,
+    optimize_for_web: true
+  }));
+
+  const response = await fetch('https://api.foxit.com/v1/pdf-services/compress', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Accept': 'application/pdf'
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    console.log('Compression failed, continuing without compression');
+    return pdfBuffer; // Return original if compression fails
+  }
+
+  return await response.arrayBuffer();
+}
+
+// PDF Services API: Add security
+async function addSecurityWithFoxit(pdfBuffer: ArrayBuffer, apiKey: string): Promise<ArrayBuffer> {
+  const formData = new FormData();
+  const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+  formData.append('file', blob, 'document.pdf');
+  
+  formData.append('security_options', JSON.stringify({
+    owner_password: 'reportweave_admin_2024',
+    user_password: '', // No user password for easy viewing
+    permissions: {
+      allow_printing: true,
+      allow_copying: false,
+      allow_modification: false,
+      allow_annotation: true
+    }
+  }));
+
+  const response = await fetch('https://api.foxit.com/v1/pdf-services/secure', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Accept': 'application/pdf'
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    console.log('Security failed, continuing without security');
+    return pdfBuffer; // Return original if security fails
+  }
+
+  return await response.arrayBuffer();
+}
+
+// Document templates
+function createPropertyReportTemplate(): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: 'Arial', sans-serif; margin: 0; padding: 20px; }
+        .header { background: #667eea; color: white; padding: 30px; text-align: center; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .highlight { background: #f8f9fa; padding: 15px; border-left: 4px solid #667eea; }
+        .price { font-size: 2em; color: #059669; font-weight: bold; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Property Analysis Report</h1>
+        <p>{{property_address}}</p>
+      </div>
+      
+      <div class="section">
+        <h2>Financial Summary</h2>
+        <div class="highlight">
+          <div class="price">{{property_price}}</div>
+          <p>Price per sq ft: {{price_per_sqft}}</p>
+          <p>Property Tax: {{property_tax}}</p>
+          <p>HOA Fees: {{hoa_fees}}</p>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>Property Details</h2>
+        <div class="grid">
+          <div>
+            <p><strong>Bedrooms:</strong> {{bedrooms}}</p>
+            <p><strong>Bathrooms:</strong> {{bathrooms}}</p>
+            <p><strong>Square Footage:</strong> {{square_footage}}</p>
+          </div>
+          <div>
+            <p><strong>Year Built:</strong> {{year_built}}</p>
+            <p><strong>Lot Size:</strong> {{lot_size}}</p>
+            <p><strong>Parking:</strong> {{parking_info}}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>Market Analysis</h2>
+        <p><strong>Days on Market:</strong> {{days_on_market}}</p>
+        <p><strong>School District:</strong> {{school_district}}</p>
+        <p><strong>Walk Score:</strong> {{walk_score}}/100</p>
+      </div>
+      
+      <div class="section">
+        <h2>Agent Information</h2>
+        <p><strong>{{agent_name}}</strong></p>
+        <p>{{agent_brokerage}}</p>
+        <p>Phone: {{agent_phone}}</p>
+        <p>Email: {{agent_email}}</p>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+function createCoverPageTemplate(): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { 
+          margin: 0; 
+          padding: 0; 
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          font-family: 'Arial', sans-serif;
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+        }
+        .hero-image {
+          width: 400px;
+          height: 300px;
+          object-fit: cover;
+          border-radius: 20px;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+          margin: 20px 0;
+        }
+        .price {
+          font-size: 3em;
+          font-weight: bold;
+          margin: 20px 0;
+          background: rgba(255,255,255,0.2);
+          padding: 20px;
+          border-radius: 15px;
+        }
+        .address {
+          font-size: 1.5em;
+          margin: 10px 0;
+        }
+        .mls {
+          font-size: 1.2em;
+          opacity: 0.9;
+        }
+        .agent-info {
+          position: absolute;
+          bottom: 50px;
+          font-size: 1.1em;
+        }
+      </style>
+    </head>
+    <body>
+      <h1 style="font-size: 2.5em; margin-bottom: 20px;">Premium Property Report</h1>
+      <img src="{{hero_image}}" alt="Property" class="hero-image" />
+      <div class="address">{{property_address}}</div>
+      <div class="price">{{property_price}}</div>
+      <div class="mls">MLS #{{mls_number}} • Listed {{listing_date}}</div>
+      <div class="agent-info">
+        Presented by {{agent_name}}<br>
+        {{agent_brokerage}}
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+function createFloorPlanTemplate(): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: 'Arial', sans-serif; margin: 0; padding: 20px; }
+        .layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .specs { background: #f8f9fa; padding: 20px; border-radius: 10px; }
+        .images-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .property-image { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; }
+        .features { margin: 20px 0; }
+        .feature-tag { 
+          display: inline-block; 
+          background: #667eea; 
+          color: white; 
+          padding: 5px 10px; 
+          margin: 5px; 
+          border-radius: 20px;
+          font-size: 0.9em;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Property Layout & Features</h1>
+      
+      <div class="layout-grid">
+        <div class="specs">
+          <h2>Specifications</h2>
+          <p><strong>Bedrooms:</strong> {{bedrooms}}</p>
+          <p><strong>Bathrooms:</strong> {{bathrooms}}</p>
+          <p><strong>Square Footage:</strong> {{square_footage}} sq ft</p>
+          <p><strong>Lot Size:</strong> {{lot_size}}</p>
+          <p><strong>Year Built:</strong> {{year_built}}</p>
+        </div>
+        
+        <div>
+          <h2>Property Images</h2>
+          <div class="images-grid">
+            {{#each property_images}}
+            <img src="{{this}}" alt="Property View" class="property-image" />
+            {{/each}}
+          </div>
+        </div>
+      </div>
+      
+      <div class="features">
+        <h2>Key Features</h2>
+        {{#each features}}
+        <span class="feature-tag">{{this}}</span>
+        {{/each}}
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+function mapDataForTemplate(data: any): any {
+  return {
+    property_address: data.address,
+    property_price: data.price,
+    bedrooms: data.bedrooms,
+    bathrooms: data.bathrooms,
+    square_footage: data.squareFootage?.toLocaleString(),
+    year_built: data.yearBuilt,
+    lot_size: data.lotSize,
+    parking_info: data.parking,
+    days_on_market: data.marketStats?.daysOnMarket,
+    price_per_sqft: data.marketStats?.pricePerSqFt,
+    property_tax: data.financials?.propertyTax,
+    hoa_fees: data.financials?.hoaFees,
+    school_district: data.schoolDistrict,
+    walk_score: data.neighborhood?.walkScore,
+    agent_name: data.agentInfo?.name,
+    agent_brokerage: data.agentInfo?.brokerage,
+    agent_phone: data.agentInfo?.phone,
+    agent_email: data.agentInfo?.email
+  };
 }
 
 async function pollFoxitJob(jobId: string, apiKey: string): Promise<ArrayBuffer> {
