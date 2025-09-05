@@ -1,7 +1,7 @@
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-// Task data interface
+// Comprehensive task data interface
 export interface TaskData {
   id: string;
   type: 'url' | 'file';
@@ -14,6 +14,44 @@ export interface TaskData {
     bedrooms?: number;
     bathrooms?: number;
     sqft?: number;
+    // Agent information
+    agentName?: string;
+    agentPhone?: string;
+    agentEmail?: string;
+    agentLicense?: string;
+    agentBrokerage?: string;
+    // Property details
+    propertyDescription?: string;
+    yearBuilt?: number;
+    lotSize?: string;
+    parkingInfo?: string;
+    propertyType?: string;
+    mlsNumber?: string;
+    listingDate?: string;
+    // School information
+    schoolDistrict?: string;
+    elementarySchool?: string;
+    middleSchool?: string;
+    highSchool?: string;
+    // Neighborhood scores
+    walkScore?: number;
+    transitScore?: number;
+    bikeScore?: number;
+    // Financial information
+    propertyTax?: string;
+    hoaFees?: string;
+    insuranceCost?: string;
+    // Market data
+    daysOnMarket?: number;
+    pricePerSqFt?: string;
+    lastSoldDate?: string;
+    lastSoldPrice?: string;
+    // URLs and media
+    virtualTourUrl?: string;
+    mapLocationUrl?: string;
+    propertyImages?: string[];
+    features?: string[];
+    nearbyAmenities?: string[];
     downloads?: {
       pdf?: string;
       json?: string;
@@ -148,7 +186,7 @@ export const fetchTasks = async () => {
 
     if (extractedError) throw extractedError;
 
-    // Combine tasks with their extracted data
+    // Combine tasks with their comprehensive extracted data
     const combinedTasks: TaskData[] = tasksData.map(task => {
       const results = extractedData.find(data => data.task_id === task.id);
       return {
@@ -163,6 +201,44 @@ export const fetchTasks = async () => {
           bedrooms: results.bedrooms,
           bathrooms: results.bathrooms,
           sqft: results.square_footage,
+          // Agent information
+          agentName: results.agent_name,
+          agentPhone: results.agent_phone,
+          agentEmail: results.agent_email,
+          agentLicense: results.agent_license,
+          agentBrokerage: results.agent_brokerage,
+          // Property details
+          propertyDescription: results.property_description,
+          yearBuilt: results.year_built,
+          lotSize: results.lot_size,
+          parkingInfo: results.parking_info,
+          propertyType: results.property_type,
+          mlsNumber: results.mls_number,
+          listingDate: results.listing_date,
+          // School information
+          schoolDistrict: results.school_district,
+          elementarySchool: results.elementary_school,
+          middleSchool: results.middle_school,
+          highSchool: results.high_school,
+          // Neighborhood scores
+          walkScore: results.walk_score,
+          transitScore: results.transit_score,
+          bikeScore: results.bike_score,
+          // Financial information
+          propertyTax: results.property_tax,
+          hoaFees: results.hoa_fees,
+          insuranceCost: results.insurance_cost,
+          // Market data
+          daysOnMarket: results.days_on_market,
+          pricePerSqFt: results.price_per_sqft,
+          lastSoldDate: results.last_sold_date,
+          lastSoldPrice: results.last_sold_price,
+          // URLs and media
+          virtualTourUrl: results.virtual_tour_url,
+          mapLocationUrl: results.map_location_url,
+          propertyImages: results.property_images,
+          features: results.features,
+          nearbyAmenities: results.nearby_amenities,
           downloads: {
             pdf: results.pdf_url,
             json: results.json_url,

@@ -46,7 +46,7 @@ serve(async (req) => {
       .update({ progress: 80 })
       .eq('id', taskId);
 
-    // Store extracted data
+    // Store comprehensive extracted data
     await supabase
       .from('extracted_data')
       .insert({
@@ -58,7 +58,45 @@ serve(async (req) => {
         square_footage: scrapedData.squareFootage,
         pdf_url: pdfUrl,
         json_url: `https://qtpohoygpgkfzuqvxsdv.supabase.co/storage/v1/object/public/reports/${taskId}_data.json`,
-        excel_url: `https://qtpohoygpgkfzuqvxsdv.supabase.co/storage/v1/object/public/reports/${taskId}_data.xlsx`
+        excel_url: `https://qtpohoygpgkfzuqvxsdv.supabase.co/storage/v1/object/public/reports/${taskId}_data.xlsx`,
+        // Agent information
+        agent_name: scrapedData.agentInfo?.name,
+        agent_phone: scrapedData.agentInfo?.phone,
+        agent_email: scrapedData.agentInfo?.email,
+        agent_license: scrapedData.agentInfo?.license,
+        agent_brokerage: scrapedData.agentInfo?.brokerage,
+        // Property details
+        property_description: scrapedData.propertyDescription,
+        year_built: scrapedData.yearBuilt,
+        lot_size: scrapedData.lotSize,
+        parking_info: scrapedData.parking,
+        property_type: scrapedData.propertyType,
+        mls_number: scrapedData.mlsNumber,
+        listing_date: scrapedData.listingDate,
+        // School information
+        school_district: scrapedData.schoolDistrict,
+        elementary_school: scrapedData.schools?.elementary,
+        middle_school: scrapedData.schools?.middle,
+        high_school: scrapedData.schools?.high,
+        // Neighborhood scores
+        walk_score: scrapedData.neighborhood?.walkScore,
+        transit_score: scrapedData.neighborhood?.transitScore,
+        bike_score: scrapedData.neighborhood?.bikeScore,
+        // Financial information
+        property_tax: scrapedData.financials?.propertyTax,
+        hoa_fees: scrapedData.financials?.hoaFees,
+        insurance_cost: scrapedData.financials?.insurance,
+        // Market data
+        days_on_market: scrapedData.marketStats?.daysOnMarket,
+        price_per_sqft: scrapedData.marketStats?.pricePerSqFt,
+        last_sold_date: scrapedData.marketStats?.lastSoldDate,
+        last_sold_price: scrapedData.marketStats?.lastSoldPrice,
+        // URLs and media
+        virtual_tour_url: scrapedData.virtualTour,
+        map_location_url: scrapedData.mapLocation,
+        property_images: scrapedData.images,
+        features: scrapedData.features,
+        nearby_amenities: scrapedData.neighborhood?.nearbyAmenities
       });
 
     // Mark task as complete

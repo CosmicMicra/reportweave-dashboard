@@ -17,42 +17,135 @@ export type Database = {
       extracted_data: {
         Row: {
           address: string | null
+          agent_brokerage: string | null
+          agent_email: string | null
+          agent_license: string | null
+          agent_name: string | null
+          agent_phone: string | null
           bathrooms: number | null
           bedrooms: number | null
+          bike_score: number | null
           created_at: string
+          days_on_market: number | null
+          elementary_school: string | null
           excel_url: string | null
+          features: string[] | null
+          high_school: string | null
+          hoa_fees: string | null
           id: string
+          insurance_cost: string | null
           json_url: string | null
+          last_sold_date: string | null
+          last_sold_price: string | null
+          listing_date: string | null
+          lot_size: string | null
+          map_location_url: string | null
+          middle_school: string | null
+          mls_number: string | null
+          nearby_amenities: string[] | null
+          parking_info: string | null
           pdf_url: string | null
           price: string | null
+          price_per_sqft: string | null
+          property_description: string | null
+          property_images: string[] | null
+          property_tax: string | null
+          property_type: string | null
+          school_district: string | null
           square_footage: number | null
           task_id: string
+          transit_score: number | null
+          virtual_tour_url: string | null
+          walk_score: number | null
+          year_built: number | null
         }
         Insert: {
           address?: string | null
+          agent_brokerage?: string | null
+          agent_email?: string | null
+          agent_license?: string | null
+          agent_name?: string | null
+          agent_phone?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
+          bike_score?: number | null
           created_at?: string
+          days_on_market?: number | null
+          elementary_school?: string | null
           excel_url?: string | null
+          features?: string[] | null
+          high_school?: string | null
+          hoa_fees?: string | null
           id?: string
+          insurance_cost?: string | null
           json_url?: string | null
+          last_sold_date?: string | null
+          last_sold_price?: string | null
+          listing_date?: string | null
+          lot_size?: string | null
+          map_location_url?: string | null
+          middle_school?: string | null
+          mls_number?: string | null
+          nearby_amenities?: string[] | null
+          parking_info?: string | null
           pdf_url?: string | null
           price?: string | null
+          price_per_sqft?: string | null
+          property_description?: string | null
+          property_images?: string[] | null
+          property_tax?: string | null
+          property_type?: string | null
+          school_district?: string | null
           square_footage?: number | null
           task_id: string
+          transit_score?: number | null
+          virtual_tour_url?: string | null
+          walk_score?: number | null
+          year_built?: number | null
         }
         Update: {
           address?: string | null
+          agent_brokerage?: string | null
+          agent_email?: string | null
+          agent_license?: string | null
+          agent_name?: string | null
+          agent_phone?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
+          bike_score?: number | null
           created_at?: string
+          days_on_market?: number | null
+          elementary_school?: string | null
           excel_url?: string | null
+          features?: string[] | null
+          high_school?: string | null
+          hoa_fees?: string | null
           id?: string
+          insurance_cost?: string | null
           json_url?: string | null
+          last_sold_date?: string | null
+          last_sold_price?: string | null
+          listing_date?: string | null
+          lot_size?: string | null
+          map_location_url?: string | null
+          middle_school?: string | null
+          mls_number?: string | null
+          nearby_amenities?: string[] | null
+          parking_info?: string | null
           pdf_url?: string | null
           price?: string | null
+          price_per_sqft?: string | null
+          property_description?: string | null
+          property_images?: string[] | null
+          property_tax?: string | null
+          property_type?: string | null
+          school_district?: string | null
           square_footage?: number | null
           task_id?: string
+          transit_score?: number | null
+          virtual_tour_url?: string | null
+          walk_score?: number | null
+          year_built?: number | null
         }
         Relationships: [
           {
