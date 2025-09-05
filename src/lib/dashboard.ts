@@ -13,10 +13,12 @@ export interface TaskData {
     address?: string;
     bedrooms?: number;
     bathrooms?: number;
-    squareFootage?: number;
-    pdfUrl?: string;
-    jsonUrl?: string;
-    excelUrl?: string;
+    sqft?: number;
+    downloads?: {
+      pdf?: string;
+      json?: string;
+      excel?: string;
+    };
   };
 }
 
@@ -160,10 +162,12 @@ export const fetchTasks = async () => {
           address: results.address,
           bedrooms: results.bedrooms,
           bathrooms: results.bathrooms,
-          squareFootage: results.square_footage,
-          pdfUrl: results.pdf_url,
-          jsonUrl: results.json_url,
-          excelUrl: results.excel_url
+          sqft: results.square_footage,
+          downloads: {
+            pdf: results.pdf_url,
+            json: results.json_url,
+            excel: results.excel_url
+          }
         } : undefined
       };
     });
