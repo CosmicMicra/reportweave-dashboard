@@ -131,15 +131,18 @@ export const startProcessing = async (): Promise<void> => {
         return;
       }
     } else if (activeTab === 'multi-url') {
-      const urlInputs = document.querySelectorAll('[placeholder*="Property URL"]') as NodeListOf<HTMLInputElement>;
+      // Get all URL inputs in the multi-url tab
+      const urlInputs = document.querySelectorAll('input[placeholder*="Property URL"]') as NodeListOf<HTMLInputElement>;
       const urls = Array.from(urlInputs)
         .map(input => input.value.trim())
         .filter(url => url.length > 0);
       
+      console.log('Multi-URL inputs found:', urlInputs.length, 'URLs with values:', urls);
+      
       if (urls.length === 0) {
         toast({
           title: "Error",
-          description: "Please provide at least one property URL",
+          description: "Please provide at least one property URL in the multi-property section",
           variant: "destructive"
         });
         return;
