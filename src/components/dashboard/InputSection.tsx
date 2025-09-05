@@ -104,12 +104,12 @@ export function InputSection({ onStartProcessing }: InputSectionProps) {
               >
                 <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-foreground font-medium mb-2">Drop files here or click to browse</p>
-                <p className="text-sm text-muted-foreground mb-4">Supports PDF, DOC, DOCX, TXT, HTML files</p>
+                <p className="text-sm text-muted-foreground mb-4">Supports DOC, DOCX, TXT, HTML files</p>
                 <input
                   id="fileInput"
                   type="file"
                   multiple
-                  accept=".pdf,.doc,.docx,.txt,.html"
+                  accept=".doc,.docx,.txt,.html"
                   onChange={handleFileChange}
                   className="hidden"
                 />
