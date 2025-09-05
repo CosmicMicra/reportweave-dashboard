@@ -195,7 +195,26 @@ export function InputSection({ onStartProcessing }: InputSectionProps) {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                   >
-                    <p className="text-sm">Drop PDF files here</p>
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setPdfFiles(prev => [...prev, ...Array.from(e.target.files!).filter(f => f.type === 'application/pdf')]);
+                        }
+                      }}
+                      className="hidden"
+                      id="merge-pdf-input"
+                    />
+                    <p className="text-sm mb-2">Drop PDF files here or</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById('merge-pdf-input')?.click()}
+                    >
+                      Choose Files
+                    </Button>
                   </div>
                 </Card>
 
@@ -212,7 +231,25 @@ export function InputSection({ onStartProcessing }: InputSectionProps) {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                   >
-                    <p className="text-sm">Drop PDF file here</p>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setPdfFiles([e.target.files[0]]);
+                        }
+                      }}
+                      className="hidden"
+                      id="split-pdf-input"
+                    />
+                    <p className="text-sm mb-2">Drop PDF file here or</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById('split-pdf-input')?.click()}
+                    >
+                      Choose File
+                    </Button>
                   </div>
                 </Card>
               </div>
@@ -221,8 +258,11 @@ export function InputSection({ onStartProcessing }: InputSectionProps) {
                 <div className="space-y-2">
                   <h4 className="font-medium">Selected PDF Files:</h4>
                   {pdfFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded" data-pdf-file>
                       <span className="text-sm">{file.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </span>
                       <Button 
                         onClick={() => removePdfFile(index)} 
                         variant="ghost" 

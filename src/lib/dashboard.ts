@@ -152,8 +152,32 @@ export const startProcessing = async (): Promise<void> => {
       type = 'multi-url';
       additionalData.urls = urls;
     } else if (activeTab === 'pdf-tools') {
-      source = 'PDF operation';
+      // Check for PDF files in the PDF tools section
+      const pdfFileInputs = document.querySelectorAll('input[type="file"][accept*="pdf"]') as NodeListOf<HTMLInputElement>;
+      let pdfFiles: File[] = [];
+      
+      // Get PDF files from file inputs or check if any were dropped
+      pdfFileInputs.forEach(input => {
+        if (input.files) {
+          pdfFiles.push(...Array.from(input.files).filter(f => f.type === 'application/pdf'));
+        }
+      });
+
+      // Check for files in the component's state (this might need a different approach)
+      const fileListElements = document.querySelectorAll('[data-pdf-file]');
+      
+      if (pdfFiles.length === 0 && fileListElements.length === 0) {
+        toast({
+          title: "Error",
+          description: "Please select PDF files for merge/split operations",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      source = `${pdfFiles.length} PDF files`;
       type = 'pdf-tools';
+      additionalData.pdfFiles = pdfFiles;
     } else {
       toast({
         title: "Error",
@@ -207,12 +231,32 @@ export const startProcessing = async (): Promise<void> => {
         }
       });
     } else if (type === 'pdf-tools') {
-      toast({
-        title: "Coming Soon",
-        description: "PDF tools functionality will be available soon",
-        variant: "default"
-      });
-      return;
+      // For now, show a coming soon message - full implementation requires file upload handling
+      if (additionalData.pdfFiles && additionalData.pdfFiles.length > 1) {
+        // Multiple files = merge operation
+        await supabase.functions.invoke('merge-pdfs', {
+          body: { 
+            taskId: taskData.id, 
+            fileUrls: [] // Would need to upload files first
+          }
+        });
+      } else if (additionalData.pdfFiles && additionalData.pdfFiles.length === 1) {
+        // Single file = split operation
+        await supabase.functions.invoke('split-pdf', {
+          body: { 
+            taskId: taskData.id, 
+            fileUrl: '', // Would need to upload file first
+            splitOptions: { type: 'pages', pagesPerFile: 1 }
+          }
+        });
+      } else {
+        toast({
+          title: "Coming Soon",
+          description: "PDF tools functionality requires file upload implementation",
+          variant: "default"
+        });
+        return;
+      }
     }
 
     // Clear inputs based on type
