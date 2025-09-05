@@ -79,13 +79,24 @@ export function TaskCard({ id, type, source, status, progress, results }: TaskCa
 
   const handleDownload = (url?: string, filename?: string) => {
     if (url) {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename || '';
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Create a proper download with filename
+      fetch(url)
+        .then(response => response.blob())
+        .then(blob => {
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = filename || 'download';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(downloadUrl);
+        })
+        .catch(error => {
+          console.error('Download failed:', error);
+          // Fallback: open in new tab
+          window.open(url, '_blank');
+        });
     }
   };
 
