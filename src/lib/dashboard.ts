@@ -56,7 +56,7 @@ const notifyListeners = () => {
 export const startProcessing = async (): Promise<void> => {
   try {
     // Get input values from the DOM (in a real app, this would be passed as parameters)
-    const urlInput = document.querySelector('input[placeholder="Enter URL to extract data from"]') as HTMLInputElement;
+    const urlInput = document.querySelector('#urlInput') as HTMLInputElement;
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     const compressionSelect = document.querySelector('[data-testid="compression-select"]') as HTMLSelectElement;
     const formatSelect = document.querySelector('[data-testid="format-select"]') as HTMLSelectElement;
