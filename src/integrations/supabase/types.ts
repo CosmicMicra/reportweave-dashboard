@@ -14,7 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      extracted_data: {
+        Row: {
+          address: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string
+          excel_url: string | null
+          id: string
+          json_url: string | null
+          pdf_url: string | null
+          price: string | null
+          square_footage: number | null
+          task_id: string
+        }
+        Insert: {
+          address?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          excel_url?: string | null
+          id?: string
+          json_url?: string | null
+          pdf_url?: string | null
+          price?: string | null
+          square_footage?: number | null
+          task_id: string
+        }
+        Update: {
+          address?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          excel_url?: string | null
+          id?: string
+          json_url?: string | null
+          pdf_url?: string | null
+          price?: string | null
+          square_footage?: number | null
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extracted_data_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          created_at: string
+          id: string
+          progress: number
+          source: string
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          progress?: number
+          source: string
+          status?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          progress?: number
+          source?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

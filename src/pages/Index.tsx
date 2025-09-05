@@ -6,7 +6,7 @@ import { TaskCard } from "@/components/dashboard/TaskCard";
 import { 
   startProcessing, 
   subscribeToTasks, 
-  getTasks, 
+  fetchTasks,
   getTaskStats,
   type TaskData 
 } from "@/lib/dashboard";
@@ -16,15 +16,13 @@ const Index = () => {
   const [stats, setStats] = useState({ total: 0, processing: 0, completed: 0, failed: 0 });
 
   useEffect(() => {
-    // Subscribe to task updates
     const unsubscribe = subscribeToTasks((updatedTasks) => {
       setTasks(updatedTasks);
       setStats(getTaskStats());
     });
 
-    // Initialize with existing tasks
-    setTasks(getTasks());
-    setStats(getTaskStats());
+    // Load initial tasks from database
+    fetchTasks();
 
     return unsubscribe;
   }, []);

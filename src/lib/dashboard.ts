@@ -1,6 +1,8 @@
-// Dashboard utility functions for API integration
+import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-interface TaskData {
+// Task data interface
+export interface TaskData {
   id: string;
   type: 'url' | 'file';
   source: string;
@@ -11,154 +13,196 @@ interface TaskData {
     address?: string;
     bedrooms?: number;
     bathrooms?: number;
-    sqft?: number;
-    downloads?: {
-      pdf?: string;
-      json?: string;
-      excel?: string;
-    };
+    squareFootage?: number;
+    pdfUrl?: string;
+    jsonUrl?: string;
+    excelUrl?: string;
   };
 }
 
-// Global state for tasks
+// Global state for tasks (in production, this would be in a proper state management solution)
 let tasks: TaskData[] = [];
-let taskListeners: Array<(tasks: TaskData[]) => void> = [];
+let taskListeners: ((tasks: TaskData[]) => void)[] = [];
 
 // Subscribe to task updates
-export function subscribeToTasks(listener: (tasks: TaskData[]) => void) {
+export const subscribeToTasks = (listener: (tasks: TaskData[]) => void) => {
   taskListeners.push(listener);
+  
+  // Set up realtime subscription
+  const channel = supabase
+    .channel('task-changes')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'tasks'
+    }, (payload) => {
+      console.log('Task change:', payload);
+      fetchTasks();
+    })
+    .subscribe();
+
   return () => {
     taskListeners = taskListeners.filter(l => l !== listener);
+    supabase.removeChannel(channel);
   };
-}
+};
 
-// Notify all listeners
-function notifyListeners() {
+// Notify all listeners of task changes
+const notifyListeners = () => {
   taskListeners.forEach(listener => listener([...tasks]));
-}
+};
 
-// Required API integration functions
-export function startProcessing() {
-  const urlInput = document.getElementById('urlInput') as HTMLInputElement;
-  const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-  const compressionLevel = document.getElementById('compressionLevel') as HTMLSelectElement;
-  const outputFormat = document.getElementById('outputFormat') as HTMLSelectElement;
-  
-  console.log('Starting processing with:', {
-    url: urlInput?.value,
-    files: fileInput?.files,
-    compression: compressionLevel?.value,
-    format: outputFormat?.value
-  });
-  
-  // Create demo task for URL input
-  if (urlInput?.value) {
-    const taskData: TaskData = {
-      id: `task-${Date.now()}`,
-      type: 'url',
-      source: urlInput.value,
-      status: 'processing',
-      progress: 0
-    };
-    addTaskCard(taskData);
-    
-    // Simulate processing
-    simulateProgress(taskData.id);
-  }
-  
-  // Create demo tasks for file input
-  if (fileInput?.files) {
-    Array.from(fileInput.files).forEach((file, index) => {
-      const taskData: TaskData = {
-        id: `task-${Date.now()}-${index}`,
-        type: 'file',
-        source: file.name,
+// Main function to start processing
+export const startProcessing = async (): Promise<void> => {
+  try {
+    // Get input values from the DOM (in a real app, this would be passed as parameters)
+    const urlInput = document.querySelector('input[placeholder="Enter URL to extract data from"]') as HTMLInputElement;
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const compressionSelect = document.querySelector('[data-testid="compression-select"]') as HTMLSelectElement;
+    const formatSelect = document.querySelector('[data-testid="format-select"]') as HTMLSelectElement;
+
+    let source: string;
+    let type: 'url' | 'file';
+
+    if (urlInput?.value) {
+      source = urlInput.value;
+      type = 'url';
+    } else if (fileInput?.files?.[0]) {
+      source = fileInput.files[0].name;
+      type = 'file';
+    } else {
+      toast({
+        title: "Error",
+        description: "Please provide a URL or select a file to process.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Insert task into database
+    const { data: taskData, error } = await supabase
+      .from('tasks')
+      .insert({
+        type,
+        source,
         status: 'processing',
         progress: 0
-      };
-      addTaskCard(taskData);
-      
-      // Simulate processing with delay
-      setTimeout(() => simulateProgress(taskData.id), index * 1000);
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    // Call appropriate Edge Function
+    if (type === 'url') {
+      await supabase.functions.invoke('process-url', {
+        body: { taskId: taskData.id, url: source }
+      });
+    } else {
+      await supabase.functions.invoke('process-file', {
+        body: { 
+          taskId: taskData.id, 
+          fileName: source,
+          compressionLevel: compressionSelect?.value || 'medium',
+          outputFormat: formatSelect?.value || 'pdf'
+        }
+      });
+    }
+
+    // Clear inputs
+    if (urlInput) urlInput.value = '';
+    if (fileInput) fileInput.value = '';
+
+    toast({
+      title: "Processing Started",
+      description: `Started processing ${type}: ${source}`,
+    });
+
+  } catch (error) {
+    console.error('Error starting processing:', error);
+    toast({
+      title: "Error",
+      description: "Failed to start processing. Please try again.",
+      variant: "destructive"
     });
   }
-}
+};
 
-export function addTaskCard(taskData: TaskData) {
-  tasks.push(taskData);
-  notifyListeners();
-}
+// Fetch tasks from database
+export const fetchTasks = async () => {
+  try {
+    const { data: tasksData, error: tasksError } = await supabase
+      .from('tasks')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-export function updateTaskProgress(taskId: string, progress: number) {
-  const task = tasks.find(t => t.id === taskId);
-  if (task) {
-    task.progress = progress;
+    if (tasksError) throw tasksError;
+
+    const { data: extractedData, error: extractedError } = await supabase
+      .from('extracted_data')
+      .select('*');
+
+    if (extractedError) throw extractedError;
+
+    // Combine tasks with their extracted data
+    const combinedTasks: TaskData[] = tasksData.map(task => {
+      const results = extractedData.find(data => data.task_id === task.id);
+      return {
+        id: task.id,
+        type: task.type as 'url' | 'file',
+        source: task.source,
+        status: task.status as 'processing' | 'completed' | 'failed',
+        progress: task.progress,
+        results: results ? {
+          price: results.price,
+          address: results.address,
+          bedrooms: results.bedrooms,
+          bathrooms: results.bathrooms,
+          squareFootage: results.square_footage,
+          pdfUrl: results.pdf_url,
+          jsonUrl: results.json_url,
+          excelUrl: results.excel_url
+        } : undefined
+      };
+    });
+
+    tasks = combinedTasks;
     notifyListeners();
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
   }
-}
+};
 
-export function markTaskComplete(taskId: string, results: TaskData['results']) {
-  const task = tasks.find(t => t.id === taskId);
-  if (task) {
-    task.status = 'completed';
-    task.progress = 100;
-    task.results = results;
-    notifyListeners();
-  }
-}
-
-export function markTaskFailed(taskId: string) {
-  const task = tasks.find(t => t.id === taskId);
-  if (task) {
-    task.status = 'failed';
-    task.progress = 0;
-    notifyListeners();
-  }
-}
-
-export function getTasks() {
+// Get current tasks
+export const getTasks = (): TaskData[] => {
   return [...tasks];
-}
+};
 
-export function getTaskStats() {
+// Get task statistics
+export const getTaskStats = () => {
   const total = tasks.length;
   const processing = tasks.filter(t => t.status === 'processing').length;
   const completed = tasks.filter(t => t.status === 'completed').length;
   const failed = tasks.filter(t => t.status === 'failed').length;
   
   return { total, processing, completed, failed };
-}
+};
 
-// Demo simulation function
-function simulateProgress(taskId: string) {
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += Math.random() * 15 + 5; // Random progress between 5-20%
-    
-    if (progress >= 100) {
-      progress = 100;
-      clearInterval(interval);
-      
-      // Simulate completion with sample data
-      const sampleResults = {
-        price: '$' + (Math.floor(Math.random() * 900000) + 100000).toLocaleString(),
-        address: `${Math.floor(Math.random() * 9999) + 1} ${['Main St', 'Oak Ave', 'Pine Rd', 'Elm Dr'][Math.floor(Math.random() * 4)]}`,
-        bedrooms: Math.floor(Math.random() * 4) + 2,
-        bathrooms: Math.floor(Math.random() * 3) + 1,
-        sqft: Math.floor(Math.random() * 2000) + 1000,
-        downloads: {
-          pdf: '#pdf-download',
-          json: '#json-download',
-          excel: '#excel-download'
-        }
-      };
-      
-      markTaskComplete(taskId, sampleResults);
-    } else {
-      updateTaskProgress(taskId, Math.floor(progress));
-    }
-  }, 500 + Math.random() * 1000); // Random interval between 500-1500ms
-}
+// Legacy functions for compatibility - no longer needed with Supabase
+export const addTaskCard = (taskData: TaskData) => {
+  // Tasks are now managed in database
+};
 
-// Export the task type for components
-export type { TaskData };
+export const updateTaskProgress = (taskId: string, progress: number) => {
+  // Progress is now updated by Edge Functions
+};
+
+export const markTaskComplete = (taskId: string, results: TaskData['results']) => {
+  // Completion is now handled by Edge Functions
+};
+
+export const markTaskFailed = (taskId: string) => {
+  // Failure status is now handled by Edge Functions
+};
