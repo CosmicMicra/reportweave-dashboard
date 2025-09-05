@@ -18,6 +18,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'luxury': ['Playfair Display', 'serif'],
+				'sans': ['Inter', 'system-ui', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -67,6 +71,10 @@ export default {
 				're-charcoal': 'hsl(var(--re-charcoal))',
 				're-slate': 'hsl(var(--re-slate))',
 				're-gold': 'hsl(var(--re-gold))',
+				'luxury-navy': 'hsl(var(--luxury-navy))',
+				'luxury-cream': 'hsl(var(--luxury-cream))',
+				'luxury-platinum': 'hsl(var(--luxury-platinum))',
+				'luxury-bronze': 'hsl(var(--luxury-bronze))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -122,11 +130,18 @@ export default {
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-accent': 'var(--gradient-accent)'
+				'gradient-accent': 'var(--gradient-accent)',
+				'gradient-luxury': 'var(--gradient-luxury)',
+				'gradient-glass': 'var(--gradient-glass)'
 			},
 			boxShadow: {
 				'card': 'var(--shadow-card)',
-				'elevated': 'var(--shadow-elevated)'
+				'elevated': 'var(--shadow-elevated)',
+				'luxury': 'var(--shadow-luxury)',
+				'glass': 'var(--shadow-glass)'
+			},
+			backdropBlur: {
+				'xs': '2px',
 			}
 		}
 	},

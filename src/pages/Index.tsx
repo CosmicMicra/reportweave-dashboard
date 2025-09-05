@@ -30,29 +30,29 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gradient-accent">
-              <Home className="h-6 w-6 text-accent-foreground" />
+    <div className="min-h-screen bg-gradient-luxury">
+      {/* Luxury Header */}
+      <header className="border-b border-luxury-platinum/20 bg-white/80 backdrop-blur-sm">
+        <div className="container mx-auto px-8 py-8">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-gradient-accent shadow-luxury">
+              <div className="w-8 h-8 bg-primary rounded-lg transform rotate-45"></div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">
-                🏠 Real Estate Data Extractor
+              <h1 className="text-3xl font-luxury font-bold bg-gradient-to-r from-primary to-luxury-bronze bg-clip-text text-transparent">
+                ReportWeave
               </h1>
-              <p className="text-muted-foreground">
-                Professional property data compilation and reporting
+              <p className="text-muted-foreground font-medium tracking-wide">
+                Luxury Real Estate Intelligence Platform
               </p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8 space-y-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <main className="container mx-auto px-8 py-12 space-y-12">
+        {/* Luxury Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <StatsCard
             title="Total Tasks"
             value={stats.total}
@@ -82,11 +82,11 @@ const Index = () => {
         {/* Input Section */}
         <InputSection onStartProcessing={startProcessing} />
 
-        {/* Tasks List */}
+        {/* Luxury Tasks List */}
         {tasks.length > 0 && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-foreground">Processing Tasks</h2>
-            <div id="tasksList" className="space-y-4">
+          <div className="space-y-8">
+            <h2 className="text-2xl font-luxury font-semibold text-foreground">Active Operations</h2>
+            <div id="tasksList" className="space-y-6">
               {tasks.map((task) => (
                 <TaskCard
                   key={task.id}
@@ -102,15 +102,15 @@ const Index = () => {
           </div>
         )}
 
-        {/* Empty State */}
+        {/* Luxury Empty State */}
         {tasks.length === 0 && (
-          <div className="text-center py-12">
-            <div className="p-4 rounded-full bg-muted w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-              <Home className="h-8 w-8 text-muted-foreground" />
+          <div className="text-center py-16">
+            <div className="p-6 rounded-3xl bg-gradient-glass backdrop-blur-sm w-24 h-24 mx-auto mb-6 flex items-center justify-center border border-white/20">
+              <Home className="h-12 w-12 text-primary" />
             </div>
-            <h3 className="text-lg font-medium text-foreground mb-2">No tasks yet</h3>
-            <p className="text-muted-foreground">
-              Start by adding a property URL or uploading files to begin extraction.
+            <h3 className="text-2xl font-luxury font-medium text-foreground mb-4">Ready to Begin</h3>
+            <p className="text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
+              Start by adding a property URL or uploading files to begin your luxury data extraction experience.
             </p>
           </div>
         )}

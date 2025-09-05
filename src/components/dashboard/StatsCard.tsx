@@ -9,14 +9,14 @@ interface StatsCardProps {
 }
 
 const variantStyles = {
-  total: "border-re-charcoal/20 bg-gradient-to-br from-background to-muted",
-  processing: "border-processing/30 bg-gradient-to-br from-processing/5 to-processing/10",
-  completed: "border-success/30 bg-gradient-to-br from-success/5 to-success/10",
-  failed: "border-destructive/30 bg-gradient-to-br from-destructive/5 to-destructive/10"
+  total: "border-luxury-platinum/30 bg-gradient-glass backdrop-blur-sm bg-white/80",
+  processing: "border-processing/20 bg-gradient-to-br from-processing/5 to-processing/10 backdrop-blur-sm bg-white/90",
+  completed: "border-success/20 bg-gradient-to-br from-success/5 to-success/10 backdrop-blur-sm bg-white/90",
+  failed: "border-destructive/20 bg-gradient-to-br from-destructive/5 to-destructive/10 backdrop-blur-sm bg-white/90"
 };
 
 const iconStyles = {
-  total: "text-re-charcoal",
+  total: "text-primary",
   processing: "text-processing",
   completed: "text-success",
   failed: "text-destructive"
@@ -24,15 +24,15 @@ const iconStyles = {
 
 export function StatsCard({ title, value, icon: Icon, variant }: StatsCardProps) {
   return (
-    <Card className={`transition-all duration-300 hover:shadow-elevated ${variantStyles[variant]}`}>
-      <CardContent className="p-6">
+    <Card className={`transition-all duration-500 hover:shadow-luxury hover:scale-105 ${variantStyles[variant]} group`}>
+      <CardContent className="p-8">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold text-foreground">{value}</p>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">{title}</p>
+            <p className="text-4xl font-luxury font-bold text-foreground tracking-tight">{value.toLocaleString()}</p>
           </div>
-          <div className={`p-3 rounded-full bg-background/50 ${iconStyles[variant]}`}>
-            <Icon className="h-6 w-6" />
+          <div className={`p-4 rounded-2xl bg-gradient-glass border border-white/20 backdrop-blur-xs transition-all duration-300 group-hover:scale-110 ${iconStyles[variant]}`}>
+            <Icon className="h-8 w-8" />
           </div>
         </div>
       </CardContent>
