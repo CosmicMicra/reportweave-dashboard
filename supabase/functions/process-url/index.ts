@@ -802,121 +802,316 @@ function createFloorPlanTemplate(): string {
   `;
 }
 
-// Helper function to create enhanced HTML content
+// Helper function to create enhanced HTML content with images and all property details
 function createEnhancedPropertyReport(data: any): string {
   return `
     <!DOCTYPE html>
     <html>
     <head>
       <title>Enhanced Property Report - ${data.address}</title>
+      <meta charset="UTF-8">
       <style>
         body { 
-          font-family: Arial, sans-serif; 
+          font-family: 'Arial', 'Helvetica', sans-serif; 
           margin: 0; 
           padding: 20px; 
           color: #333;
           line-height: 1.6;
+          background: #fff;
         }
-        .header {
+        
+        .cover-page {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
-          padding: 40px;
+          padding: 60px 40px;
           text-align: center;
-          border-radius: 12px;
-          margin-bottom: 30px;
+          border-radius: 16px;
+          margin-bottom: 40px;
+          page-break-after: always;
         }
-        .price {
+        
+        .cover-page h1 {
           font-size: 2.5rem;
           font-weight: bold;
-          color: #059669;
+          margin-bottom: 20px;
+        }
+        
+        .cover-page h2 {
+          font-size: 1.5rem;
+          margin-bottom: 30px;
+          opacity: 0.9;
+        }
+        
+        .price-highlight {
+          font-size: 2.2rem;
+          font-weight: bold;
+          background: rgba(255,255,255,0.2);
+          padding: 20px;
+          border-radius: 12px;
+          display: inline-block;
           margin: 20px 0;
         }
+        
+        .mls-info {
+          font-size: 1.1rem;
+          margin-top: 20px;
+          opacity: 0.9;
+        }
+        
+        .property-images {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 15px;
+          margin: 30px 0;
+          page-break-inside: avoid;
+        }
+        
+        .property-image {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          border-radius: 12px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .hero-image {
+          width: 100%;
+          height: 300px;
+          object-fit: cover;
+          border-radius: 16px;
+          margin-bottom: 30px;
+          box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
         .section {
           background: white;
           border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          padding: 20px;
-          margin-bottom: 20px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          border-radius: 12px;
+          padding: 25px;
+          margin-bottom: 25px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+          page-break-inside: avoid;
         }
+        
+        .section h3 {
+          color: #667eea;
+          font-size: 1.3rem;
+          font-weight: 600;
+          margin-bottom: 20px;
+          padding-bottom: 10px;
+          border-bottom: 2px solid #e5e7eb;
+        }
+        
         .grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 25px;
+          margin-bottom: 20px;
         }
+        
         .detail-row {
           display: flex;
           justify-content: space-between;
-          padding: 8px 0;
+          align-items: center;
+          padding: 10px 0;
           border-bottom: 1px solid #f3f4f6;
         }
-        .label { font-weight: 600; color: #6b7280; }
-        .value { color: #111827; }
+        
+        .detail-row:last-child {
+          border-bottom: none;
+        }
+        
+        .label { 
+          font-weight: 600; 
+          color: #6b7280; 
+          flex: 1;
+        }
+        
+        .value { 
+          color: #111827; 
+          font-weight: 500;
+          text-align: right;
+          flex: 1;
+        }
+        
+        .price-value {
+          color: #059669;
+          font-size: 1.4rem;
+          font-weight: bold;
+        }
+        
         .agent-section {
-          background: #f8fafc;
-          border-left: 4px solid #667eea;
+          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+          border-left: 6px solid #667eea;
         }
-        .features {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-top: 10px;
+        
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 10px;
+          margin-top: 15px;
         }
+        
         .feature-tag {
           background: #e0e7ff;
           color: #3730a3;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 0.875rem;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          font-weight: 500;
+          text-align: center;
+        }
+        
+        .school-item {
+          background: #f0f9ff;
+          border: 1px solid #0ea5e9;
+          border-radius: 8px;
+          padding: 12px;
+          margin-bottom: 8px;
+        }
+        
+        .score-badges {
+          display: flex;
+          gap: 15px;
+          margin-top: 10px;
+        }
+        
+        .score-badge {
+          background: #10b981;
+          color: white;
+          padding: 8px 12px;
+          border-radius: 20px;
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+        
+        .amenities-list {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 8px;
+          margin-top: 10px;
+        }
+        
+        .amenity-item {
+          padding: 8px 12px;
+          background: #f8fafc;
+          border-radius: 6px;
+          border-left: 3px solid #10b981;
+          font-size: 0.9rem;
+        }
+        
+        .description-text {
+          line-height: 1.8;
+          color: #374151;
+          font-size: 1rem;
+          text-align: justify;
+          margin-top: 10px;
+        }
+        
+        .footer {
+          margin-top: 50px;
+          text-align: center;
+          padding: 30px;
+          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+          border-radius: 16px;
+          color: #64748b;
+        }
+        
+        .logo {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #667eea;
+          margin-bottom: 10px;
+        }
+        
+        @media print {
+          .cover-page { page-break-after: always; }
+          .section { page-break-inside: avoid; }
         }
       </style>
     </head>
     <body>
-      <div class="header">
+      <!-- Cover Page -->
+      <div class="cover-page">
         <h1>Premium Property Report</h1>
-        <h2>${data.address}</h2>
-        <div class="price">${data.price}</div>
-        ${data.mlsNumber ? `<p>MLS #${data.mlsNumber} • Listed ${data.listingDate || 'Recently'}</p>` : ''}
+        <h2>${data.address || 'Property Address'}</h2>
+        <div class="price-highlight">${data.price || 'Price Available Upon Request'}</div>
+        ${data.mlsNumber ? `<div class="mls-info">MLS #${data.mlsNumber} • Listed ${data.listingDate || 'Recently'}</div>` : ''}
+        ${data.propertyType ? `<div class="mls-info">${data.propertyType}</div>` : ''}
       </div>
 
-      ${data.agentInfo?.name ? `
-      <div class="section agent-section">
-        <h3>Agent Information</h3>
-        <div class="detail-row">
-          <span class="label">Agent:</span>
-          <span class="value">${data.agentInfo.name}</span>
-        </div>
-        ${data.agentInfo.brokerage ? `
-        <div class="detail-row">
-          <span class="label">Brokerage:</span>
-          <span class="value">${data.agentInfo.brokerage}</span>
-        </div>` : ''}
-        ${data.agentInfo.phone ? `
-        <div class="detail-row">
-          <span class="label">Phone:</span>
-          <span class="value">${data.agentInfo.phone}</span>
-        </div>` : ''}
-        ${data.agentInfo.email ? `
-        <div class="detail-row">
-          <span class="label">Email:</span>
-          <span class="value">${data.agentInfo.email}</span>
-        </div>` : ''}
+      <!-- Hero Property Image -->
+      ${data.images && data.images.length > 0 ? `
+      <div class="section">
+        <img src="${data.images[0]}" alt="Main Property View" class="hero-image" onerror="this.style.display='none'" />
       </div>` : ''}
 
+      <!-- Property Images Gallery -->
+      ${data.images && data.images.length > 1 ? `
+      <div class="section">
+        <h3>📸 Property Gallery</h3>
+        <div class="property-images">
+          ${data.images.slice(1).map((img, index) => 
+            `<img src="${img}" alt="Property View ${index + 2}" class="property-image" onerror="this.style.display='none'" />`
+          ).join('')}
+        </div>
+      </div>` : ''}
+
+      <!-- Agent Information -->
+      ${data.agentInfo?.name ? `
+      <div class="section agent-section">
+        <h3>👤 Agent Information</h3>
+        <div class="grid">
+          <div>
+            <div class="detail-row">
+              <span class="label">Agent Name:</span>
+              <span class="value">${data.agentInfo.name}</span>
+            </div>
+            ${data.agentInfo.brokerage ? `
+            <div class="detail-row">
+              <span class="label">Brokerage:</span>
+              <span class="value">${data.agentInfo.brokerage}</span>
+            </div>` : ''}
+            ${data.agentInfo.license ? `
+            <div class="detail-row">
+              <span class="label">License:</span>
+              <span class="value">${data.agentInfo.license}</span>
+            </div>` : ''}
+          </div>
+          <div>
+            ${data.agentInfo.phone ? `
+            <div class="detail-row">
+              <span class="label">Phone:</span>
+              <span class="value">${data.agentInfo.phone}</span>
+            </div>` : ''}
+            ${data.agentInfo.email ? `
+            <div class="detail-row">
+              <span class="label">Email:</span>
+              <span class="value">${data.agentInfo.email}</span>
+            </div>` : ''}
+          </div>
+        </div>
+      </div>` : ''}
+
+      <!-- Property Overview -->
       <div class="grid">
         <div class="section">
-          <h3>Property Details</h3>
+          <h3>🏠 Property Details</h3>
+          <div class="detail-row">
+            <span class="label">Listing Price:</span>
+            <span class="value price-value">${data.price || 'N/A'}</span>
+          </div>
           <div class="detail-row">
             <span class="label">Bedrooms:</span>
-            <span class="value">${data.bedrooms}</span>
+            <span class="value">${data.bedrooms || 'N/A'}</span>
           </div>
           <div class="detail-row">
             <span class="label">Bathrooms:</span>
-            <span class="value">${data.bathrooms}</span>
+            <span class="value">${data.bathrooms || 'N/A'}</span>
           </div>
           <div class="detail-row">
             <span class="label">Square Footage:</span>
-            <span class="value">${data.squareFootage?.toLocaleString()} sq ft</span>
+            <span class="value">${data.squareFootage ? data.squareFootage.toLocaleString() + ' sq ft' : 'N/A'}</span>
           </div>
           ${data.yearBuilt ? `
           <div class="detail-row">
@@ -936,11 +1131,7 @@ function createEnhancedPropertyReport(data: any): string {
         </div>
 
         <div class="section">
-          <h3>Financial Information</h3>
-          <div class="detail-row">
-            <span class="label">Listing Price:</span>
-            <span class="value">${data.price}</span>
-          </div>
+          <h3>💰 Financial Information</h3>
           ${data.marketStats?.pricePerSqFt ? `
           <div class="detail-row">
             <span class="label">Price per Sq Ft:</span>
@@ -956,75 +1147,103 @@ function createEnhancedPropertyReport(data: any): string {
             <span class="label">HOA Fees:</span>
             <span class="value">${data.financials.hoaFees}</span>
           </div>` : ''}
+          ${data.financials?.insurance ? `
+          <div class="detail-row">
+            <span class="label">Insurance (Est.):</span>
+            <span class="value">${data.financials.insurance}</span>
+          </div>` : ''}
           ${data.marketStats?.daysOnMarket ? `
           <div class="detail-row">
             <span class="label">Days on Market:</span>
             <span class="value">${data.marketStats.daysOnMarket} days</span>
           </div>` : ''}
+          ${data.marketStats?.lastSoldPrice ? `
+          <div class="detail-row">
+            <span class="label">Last Sold Price:</span>
+            <span class="value">${data.marketStats.lastSoldPrice}</span>
+          </div>` : ''}
+          ${data.marketStats?.lastSoldDate ? `
+          <div class="detail-row">
+            <span class="label">Last Sold Date:</span>
+            <span class="value">${data.marketStats.lastSoldDate}</span>
+          </div>` : ''}
         </div>
       </div>
 
+      <!-- Property Description -->
+      ${data.propertyDescription ? `
+      <div class="section">
+        <h3>📋 Property Description</h3>
+        <div class="description-text">${data.propertyDescription}</div>
+      </div>` : ''}
+
+      <!-- School Information -->
       ${data.schoolDistrict ? `
       <div class="section">
-        <h3>School Information</h3>
+        <h3>🎓 School Information</h3>
         <div class="detail-row">
           <span class="label">School District:</span>
           <span class="value">${data.schoolDistrict}</span>
         </div>
         ${data.schools?.elementary ? `
-        <div class="detail-row">
-          <span class="label">Elementary:</span>
-          <span class="value">${data.schools.elementary}</span>
+        <div class="school-item">
+          <strong>Elementary:</strong> ${data.schools.elementary}
         </div>` : ''}
         ${data.schools?.middle ? `
-        <div class="detail-row">
-          <span class="label">Middle School:</span>
-          <span class="value">${data.schools.middle}</span>
+        <div class="school-item">
+          <strong>Middle School:</strong> ${data.schools.middle}
         </div>` : ''}
         ${data.schools?.high ? `
-        <div class="detail-row">
-          <span class="label">High School:</span>
-          <span class="value">${data.schools.high}</span>
+        <div class="school-item">
+          <strong>High School:</strong> ${data.schools.high}
         </div>` : ''}
       </div>` : ''}
 
+      <!-- Walkability & Transit Scores -->
       ${(data.neighborhood?.walkScore || data.neighborhood?.transitScore || data.neighborhood?.bikeScore) ? `
       <div class="section">
-        <h3>Walkability & Transit</h3>
-        ${data.neighborhood.walkScore ? `
-        <div class="detail-row">
-          <span class="label">Walk Score:</span>
-          <span class="value">${data.neighborhood.walkScore}/100</span>
-        </div>` : ''}
-        ${data.neighborhood.transitScore ? `
-        <div class="detail-row">
-          <span class="label">Transit Score:</span>
-          <span class="value">${data.neighborhood.transitScore}/100</span>
-        </div>` : ''}
-        ${data.neighborhood.bikeScore ? `
-        <div class="detail-row">
-          <span class="label">Bike Score:</span>
-          <span class="value">${data.neighborhood.bikeScore}/100</span>
-        </div>` : ''}
-      </div>` : ''}
-
-      ${data.features && data.features.length > 0 ? `
-      <div class="section">
-        <h3>Key Features</h3>
-        <div class="features">
-          ${data.features.map((feature: string) => `<span class="feature-tag">${feature}</span>`).join('')}
+        <h3>🚶 Walkability & Transit</h3>
+        <div class="score-badges">
+          ${data.neighborhood.walkScore ? `<div class="score-badge">Walk Score: ${data.neighborhood.walkScore}/100</div>` : ''}
+          ${data.neighborhood.transitScore ? `<div class="score-badge">Transit: ${data.neighborhood.transitScore}/100</div>` : ''}
+          ${data.neighborhood.bikeScore ? `<div class="score-badge">Bike Score: ${data.neighborhood.bikeScore}/100</div>` : ''}
         </div>
       </div>` : ''}
 
-      ${data.propertyDescription ? `
+      <!-- Key Features -->
+      ${data.features && data.features.length > 0 ? `
       <div class="section">
-        <h3>Property Description</h3>
-        <p>${data.propertyDescription}</p>
+        <h3>⭐ Key Features & Amenities</h3>
+        <div class="features-grid">
+          ${data.features.map(feature => `<div class="feature-tag">${feature}</div>`).join('')}
+        </div>
       </div>` : ''}
 
-      <div class="section" style="text-align: center; margin-top: 40px;">
-        <p style="color: #6b7280; margin: 0;">Report generated on ${new Date().toLocaleDateString()}</p>
-        <p style="color: #667eea; font-weight: 600; margin: 5px 0 0 0;">ReportWeave Analytics</p>
+      <!-- Nearby Amenities -->
+      ${data.neighborhood?.nearbyAmenities && data.neighborhood.nearbyAmenities.length > 0 ? `
+      <div class="section">
+        <h3>📍 Nearby Amenities</h3>
+        <div class="amenities-list">
+          ${data.neighborhood.nearbyAmenities.map(amenity => `<div class="amenity-item">${amenity}</div>`).join('')}
+        </div>
+      </div>` : ''}
+
+      <!-- Virtual Tour & Links -->
+      ${data.virtualTour ? `
+      <div class="section" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+        <h3 style="color: white; border-bottom-color: rgba(255,255,255,0.3);">🏠 Virtual Tour Available</h3>
+        <p style="font-size: 1.1rem; margin: 0;">Experience this property from the comfort of your home</p>
+        <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.9;">Visit: ${data.virtualTour}</p>
+      </div>` : ''}
+
+      <!-- Footer -->
+      <div class="footer">
+        <div class="logo">ReportWeave Analytics</div>
+        <p>Professional Real Estate Reports • Generated on ${new Date().toLocaleDateString()}</p>
+        <p style="margin-top: 10px; font-size: 0.875rem;">
+          This report is generated for informational purposes. All data should be independently verified.
+        </p>
+        ${data.mlsNumber ? `<p style="margin-top: 5px; font-size: 0.875rem;">MLS #${data.mlsNumber}</p>` : ''}
       </div>
     </body>
     </html>
@@ -1146,36 +1365,120 @@ async function createFallbackPdf(data: any): Promise<string> {
   }
 }
 
-// Create a basic but properly formatted PDF
+// Create a basic but properly formatted PDF with comprehensive data
 function createBasicPdf(data: any): ArrayBuffer {
-  console.log('Creating basic PDF with proper PDF structure');
+  console.log('Creating comprehensive basic PDF with all property details');
   
-  // Create a simple but valid PDF document
+  // Create comprehensive content including all available data
   const content = `
-Property Report
+PREMIUM PROPERTY REPORT
 ${data.address || 'Property Address'}
+Generated: ${new Date().toLocaleDateString()}
 
-Price: ${data.price || 'N/A'}
+${data.mlsNumber ? `MLS #: ${data.mlsNumber}` : ''}
+${data.listingDate ? `Listed: ${data.listingDate}` : ''}
+${data.propertyType ? `Property Type: ${data.propertyType}` : ''}
+
+PRICING & FINANCIAL DETAILS
+Listing Price: ${data.price || 'N/A'}
+${data.marketStats?.pricePerSqFt ? `Price per Sq Ft: ${data.marketStats.pricePerSqFt}` : ''}
+${data.financials?.propertyTax ? `Property Tax: ${data.financials.propertyTax}` : ''}
+${data.financials?.hoaFees && data.financials.hoaFees !== 'None' ? `HOA Fees: ${data.financials.hoaFees}` : ''}
+${data.financials?.insurance ? `Insurance (Est.): ${data.financials.insurance}` : ''}
+${data.marketStats?.daysOnMarket ? `Days on Market: ${data.marketStats.daysOnMarket}` : ''}
+
+PROPERTY SPECIFICATIONS
 Bedrooms: ${data.bedrooms || 'N/A'}
 Bathrooms: ${data.bathrooms || 'N/A'}
-Square Footage: ${data.squareFootage || 'N/A'} sq ft
+Square Footage: ${data.squareFootage ? data.squareFootage.toLocaleString() + ' sq ft' : 'N/A'}
+${data.yearBuilt ? `Year Built: ${data.yearBuilt}` : ''}
+${data.lotSize ? `Lot Size: ${data.lotSize}` : ''}
+${data.parking ? `Parking: ${data.parking}` : ''}
 
-Agent: ${data.agentInfo?.name || 'N/A'}
-Phone: ${data.agentInfo?.phone || 'N/A'}
-Email: ${data.agentInfo?.email || 'N/A'}
+${data.agentInfo?.name ? `
+AGENT INFORMATION
+Agent: ${data.agentInfo.name}
+${data.agentInfo.brokerage ? `Brokerage: ${data.agentInfo.brokerage}` : ''}
+${data.agentInfo.phone ? `Phone: ${data.agentInfo.phone}` : ''}
+${data.agentInfo.email ? `Email: ${data.agentInfo.email}` : ''}
+${data.agentInfo.license ? `License: ${data.agentInfo.license}` : ''}
+` : ''}
 
-School District: ${data.schoolDistrict || 'N/A'}
-Year Built: ${data.yearBuilt || 'N/A'}
-Lot Size: ${data.lotSize || 'N/A'}
+${data.propertyDescription ? `
+PROPERTY DESCRIPTION
+${data.propertyDescription}
+` : ''}
 
-Features:
-${data.features ? data.features.map((f: string) => `• ${f}`).join('\n') : '• No features listed'}
+${data.schoolDistrict ? `
+SCHOOL INFORMATION
+School District: ${data.schoolDistrict}
+${data.schools?.elementary ? `Elementary: ${data.schools.elementary}` : ''}
+${data.schools?.middle ? `Middle School: ${data.schools.middle}` : ''}
+${data.schools?.high ? `High School: ${data.schools.high}` : ''}
+` : ''}
 
-Generated: ${new Date().toLocaleDateString()}
-Report by ReportWeave Analytics
+${(data.neighborhood?.walkScore || data.neighborhood?.transitScore || data.neighborhood?.bikeScore) ? `
+WALKABILITY & TRANSIT SCORES
+${data.neighborhood.walkScore ? `Walk Score: ${data.neighborhood.walkScore}/100` : ''}
+${data.neighborhood.transitScore ? `Transit Score: ${data.neighborhood.transitScore}/100` : ''}
+${data.neighborhood.bikeScore ? `Bike Score: ${data.neighborhood.bikeScore}/100` : ''}
+` : ''}
+
+${data.features && data.features.length > 0 ? `
+KEY FEATURES & AMENITIES
+${data.features.map((f: string) => `• ${f}`).join('\n')}
+` : ''}
+
+${data.neighborhood?.nearbyAmenities && data.neighborhood.nearbyAmenities.length > 0 ? `
+NEARBY AMENITIES
+${data.neighborhood.nearbyAmenities.map((amenity: string) => `• ${amenity}`).join('\n')}
+` : ''}
+
+${data.marketStats?.lastSoldPrice ? `
+MARKET HISTORY
+Last Sold: ${data.marketStats.lastSoldDate || 'N/A'} for ${data.marketStats.lastSoldPrice}
+` : ''}
+
+${data.virtualTour ? `
+VIRTUAL TOUR AVAILABLE
+Visit: ${data.virtualTour}
+` : ''}
+
+${data.images && data.images.length > 0 ? `
+PROPERTY IMAGES
+Note: ${data.images.length} professional photos available in digital version
+Main Photo: ${data.images[0]}
+${data.images.slice(1, 4).map((img, i) => `Photo ${i + 2}: ${img}`).join('\n')}
+` : ''}
+
+Report powered by ReportWeave Analytics
+Professional Real Estate Reports & Analysis
   `.trim();
   
-  // Create a minimal PDF structure that should be readable by most PDF viewers
+  // Create enhanced PDF structure with better formatting
+  const contentLines = content.split('\n');
+  const pdfLines = contentLines.map((line, index) => {
+    const yPos = 750 - (index * 14);
+    if (yPos < 50) return ''; // Don't write below page bottom
+    
+    // Handle different text styles
+    if (line.match(/^[A-Z\s&]+$/)) {
+      // Section headers in bold
+      return `BT /F2 14 Tf 50 ${yPos} Td (${line.replace(/[()]/g, '').substring(0, 80)}) Tj ET`;
+    } else if (line.includes(':')) {
+      // Detail lines
+      return `BT /F1 10 Tf 50 ${yPos} Td (${line.replace(/[()]/g, '').substring(0, 80)}) Tj ET`;
+    } else if (line.startsWith('•')) {
+      // Bullet points
+      return `BT /F1 9 Tf 60 ${yPos} Td (${line.replace(/[()]/g, '').substring(0, 75)}) Tj ET`;
+    } else if (line.trim().length > 0) {
+      // Regular text
+      return `BT /F1 10 Tf 50 ${yPos} Td (${line.replace(/[()]/g, '').substring(0, 80)}) Tj ET`;
+    }
+    return `BT /F1 10 Tf 50 ${yPos} Td ( ) Tj ET`; // Empty line
+  }).filter(Boolean);
+  
+  // Create professional PDF with enhanced structure
   const pdfContent = `%PDF-1.4
 1 0 obj
 <<
@@ -1201,6 +1504,7 @@ endobj
 /Resources <<
 /Font <<
 /F1 5 0 R
+/F2 6 0 R
 >>
 >>
 >>
@@ -1208,18 +1512,10 @@ endobj
 
 4 0 obj
 <<
-/Length ${content.length + 200}
+/Length ${pdfLines.join('\n').length + 100}
 >>
 stream
-BT
-/F1 12 Tf
-50 750 Td
-${content.split('\n').map((line, index) => {
-  const yPos = 750 - (index * 15);
-  if (yPos < 50) return ''; // Don't write below page bottom
-  return line.length > 0 ? `(${line.replace(/[()]/g, '')}) Tj 0 -15 Td` : '0 -15 Td';
-}).filter(Boolean).join('\n')}
-ET
+${pdfLines.join('\n')}
 endstream
 endobj
 
@@ -1231,21 +1527,30 @@ endobj
 >>
 endobj
 
+6 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica-Bold
+>>
+endobj
+
 xref
-0 6
+0 7
 0000000000 65535 f 
 0000000009 00000 n 
 0000000058 00000 n 
 0000000115 00000 n 
 0000000285 00000 n 
-0000000${(content.length + 500).toString().padStart(3, '0')} 00000 n 
+0000000${(400 + pdfLines.join('\n').length).toString().padStart(3, '0')} 00000 n 
+0000000${(480 + pdfLines.join('\n').length).toString().padStart(3, '0')} 00000 n 
 trailer
 <<
-/Size 6
+/Size 7
 /Root 1 0 R
 >>
 startxref
-${content.length + 600}
+${550 + pdfLines.join('\n').length}
 %%EOF`;
 
   // Convert to ArrayBuffer
